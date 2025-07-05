@@ -14,7 +14,7 @@ black==23.7.0
 
 # Security
 bandit==1.7.5
-safety==2.3.5
+# safety==2.3.5
 
 # Production
 gunicorn==21.2.0
