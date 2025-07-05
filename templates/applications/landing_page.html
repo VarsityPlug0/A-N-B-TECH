@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Documents - A N B TECH SUPPLIES{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fab fa-apple me-3"></i>iPhone Installment Application
+            </h1>
+            <p class="lead text-muted">Start your journey to owning an iPhone on installments</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-clipboard-list me-2"></i>Step 1: Document Upload
+                </h5>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: 25%"></div>
+                </div>
+                <small class="text-muted">Step 1 of 4: Upload required documents</small>
+            </div>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-upload me-2"></i>Upload Your Documents
+                </h5>
+                
+                {% comment %} Check if we have uploaded documents and count them {% endcomment %}
+                {% if uploaded_documents %}
+                    {% with doc_count=uploaded_documents|length %}
+                    {% if doc_count < 3 %}
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row justify-content-center">
+                                <div class="col-md-8 mb-4">
+                                    <div class="document-upload">
+                                        <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                                        <h6 class="fw-bold">Select Document Type</h6>
+                                        <div class="form-group mb-2">
+                                            <select name="document_type" class="form-select" required>
+                                                <option value="" selected>Select document type</option>
+                                                {% comment %} Check each document type and only show if not uploaded {% endcomment %}
+                                                {% for doc in uploaded_documents %}
+                                                    {% if doc.document_type == 'bank_statement' %}
+                                                        {% with bank_uploaded=True %}{% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not bank_uploaded %}
+                                                    <option value="bank_statement">Bank Statement (Required)</option>
+                                                {% endif %}
+                                                
+                                                {% for doc in uploaded_documents %}
+                                                    {% if doc.document_type == 'id_picture' %}
+                                                        {% with id_uploaded=True %}{% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not id_uploaded %}
+                                                    <option value="id_picture">ID Picture (Required)</option>
+                                                {% endif %}
+                                                
+                                                {% for doc in uploaded_documents %}
+                                                    {% if doc.document_type == 'payslip' %}
+                                                        {% with payslip_uploaded=True %}{% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not payslip_uploaded %}
+                                                    <option value="payslip">Payslip (Optional)</option>
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-upload me-2"></i>Upload Document
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-success text-center">
+                            <i class="fas fa-check-circle me-2"></i>All documents uploaded!
+                        </div>
+                    {% endif %}
+                    {% endwith %}
+                {% else %}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row justify-content-center">
+                            <div class="col-md-8 mb-4">
+                                <div class="document-upload">
+                                    <i class="fas fa-upload fa-3x text-primary mb-3"></i>
+                                    <h6 class="fw-bold">Select Document Type</h6>
+                                    <div class="form-group mb-2">
+                                        <select name="document_type" class="form-select" required>
+                                            <option value="" selected>Select document type</option>
+                                            <option value="bank_statement">Bank Statement (Required)</option>
+                                            <option value="id_picture">ID Picture (Required)</option>
+                                            <option value="payslip">Payslip (Optional)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-upload me-2"></i>Upload Document
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Uploaded Documents -->
+        {% if uploaded_documents %}
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-check-circle me-2"></i>Uploaded Documents
+                </h5>
+                <div class="row">
+                    {% for doc in uploaded_documents %}
+                    <div class="col-md-4 mb-3">
+                        <div class="alert alert-success d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <div>
+                                <strong>{{ doc.document_type|title }}</strong><br>
+                                <small class="text-muted">{{ doc.file_name }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Next Step Info -->
+        {% if can_proceed %}
+        <div class="card mt-4 border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-arrow-right fa-2x text-success mb-3"></i>
+                <h5 class="card-title text-success">Ready to Proceed!</h5>
+                <p class="card-text">You have uploaded the required documents. Click below to register your account.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-success btn-lg" id="register-btn">
+                        <i class="fas fa-user-plus me-2"></i>Register Now
+                    </button>
+                </div>
+                
+                <!-- Countdown section (hidden initially) -->
+                <div id="countdown-section" class="mt-3" style="display: none;">
+                    <p class="card-text">Redirecting to registration in <span id="countdown">5</span> seconds...</p>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" id="progress-bar" role="progressbar" style="width: 100%"></div>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" id="cancel-redirect">
+                        <i class="fas fa-times me-2"></i>Cancel Auto-Redirect
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Requirements Info -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Document Requirements
+                </h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Bank Statement:</strong> Required for income verification</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>ID Picture:</strong> Required for identity verification</li>
+                    <li><i class="fas fa-info text-info me-2"></i><strong>Payslip:</strong> Optional but recommended for faster approval</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Security:</strong> All documents are encrypted and stored securely. We only use them for verification purposes.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add file validation
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const file = this.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (file && file.size > maxSize) {
+            alert('File size must be under 5MB');
+            this.value = '';
+        }
+    });
+});
+
+// Handle register button click and countdown
+{% if can_proceed %}
+const registerBtn = document.getElementById('register-btn');
+const countdownSection = document.getElementById('countdown-section');
+let countdown = 5;
+let redirectTimer;
+
+// Handle register button click
+if (registerBtn) {
+    registerBtn.addEventListener('click', function() {
+        // Hide the register button and show countdown
+        this.style.display = 'none';
+        countdownSection.style.display = 'block';
+        
+        // Start the countdown timer
+        const countdownElement = document.getElementById('countdown');
+        const progressBar = document.getElementById('progress-bar');
+        const cancelButton = document.getElementById('cancel-redirect');
+        
+        redirectTimer = setInterval(function() {
+            countdown--;
+            if (countdownElement) {
+                countdownElement.textContent = countdown;
+            }
+            if (progressBar) {
+                progressBar.style.width = (countdown / 5 * 100) + '%';
+            }
+            
+            if (countdown <= 0) {
+                clearInterval(redirectTimer);
+                window.location.href = "{% url 'applications:register' %}";
+            }
+        }, 1000);
+        
+        // Handle cancel button
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                clearInterval(redirectTimer);
+                if (countdownElement) {
+                    countdownElement.textContent = 'Redirect cancelled';
+                }
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    progressBar.classList.remove('bg-success');
+                    progressBar.classList.add('bg-secondary');
+                }
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-check me-2"></i>Redirect Cancelled';
+                
+                // Show register button again
+                registerBtn.style.display = 'inline-block';
+                countdownSection.style.display = 'none';
+            });
+        }
+    });
+}
+{% endif %}
+</script>
+{% endblock %} 

@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Activation - A N B TECH SUPPLIES{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-credit-card me-3"></i>Account Activation
+            </h1>
+            <p class="lead text-muted">Step 3 of 4: Activate your account with payment setup</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-clipboard-list me-2"></i>Application Progress
+                </h5>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: 75%"></div>
+                </div>
+                <small class="text-muted">Step 3 of 4: Account activation with payment setup</small>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="card mb-4 border-info bg-info bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-shield-alt fa-3x text-info"></i>
+                </div>
+                <h4 class="card-title text-info fw-bold">
+                    🔒 Secure Account Activation
+                </h4>
+                <p class="card-text lead">
+                    To activate your account, we need to verify your card details. 
+                    <strong>No charges will be made</strong> - this is purely for account verification purposes.
+                </p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Important:</strong> This is a verification process only. No money will be charged to your card.
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Details Form -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-credit-card me-2"></i>Card Information
+                </h5>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Payment Duration Selection -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Choose your payment duration:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="{{ form.payment_duration.id_for_label }}" class="form-label">{{ form.payment_duration.label }}</label>
+                                {{ form.payment_duration }}
+                                {% if form.payment_duration.errors %}
+                                    <div class="text-danger">{{ form.payment_duration.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">{{ form.payment_duration.help_text }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Payment Summary</h6>
+                                        <p class="mb-1">Duration: <strong id="selected-duration">24 Months</strong></p>
+                                        <p class="mb-0">Monthly Payment: <strong id="monthly-payment">TBD</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Choose your payment method:</h6>
+                        <div class="row">
+                          {% for value, label in form.payment_method.field.choices %}
+                            <div class="col-md-6 mb-3">
+                              <div class="form-check payment-method-card">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="payment_method"
+                                       id="payment_method_{{ forloop.counter }}"
+                                       value="{{ value }}"
+                                       {% if form.payment_method.value == value %}checked{% endif %}>
+                                <label class="form-check-label" for="payment_method_{{ forloop.counter }}">
+                                  {% if value == 'manual_payment' %}
+                                    <i class="fas fa-money-bill-wave me-2"></i>
+                                    <strong>Manual Payment</strong>
+                                    <small class="d-block text-muted">Pay via bank transfer or cash deposit</small>
+                                  {% elif value == 'eft' %}
+                                    <i class="fas fa-exchange-alt me-2"></i>
+                                    <strong>EFT (Electronic Funds Transfer)</strong>
+                                    <small class="d-block text-muted">Direct bank transfer</small>
+                                  {% elif value == 'debit_order' %}
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    <strong>Debit Order</strong>
+                                    <small class="d-block text-muted">Automatic monthly deductions</small>
+                                  {% elif value == 'card_verification' %}
+                                    <i class="fas fa-credit-card me-2"></i>
+                                    <strong>Card Verification</strong>
+                                    <small class="d-block text-muted">Verify with your card (no charges)</small>
+                                  {% endif %}
+                                </label>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Card Details Section (now toggled by payment method) -->
+                    <div id="card-details-section" class="mb-4" style="display: none;">
+                        <h6 class="fw-bold mb-3">Card Details:</h6>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.card_number.id_for_label }}" class="form-label">{{ form.card_number.label }}</label>
+                                {{ form.card_number }}
+                                {% if form.card_number.errors %}
+                                    <div class="text-danger">{{ form.card_number.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Enter your 16-digit card number</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.card_expiry_month.id_for_label }}" class="form-label">{{ form.card_expiry_month.label }}</label>
+                                {{ form.card_expiry_month }}
+                                {% if form.card_expiry_month.errors %}
+                                    <div class="text-danger">{{ form.card_expiry_month.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">MM (01-12)</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.card_expiry_year.id_for_label }}" class="form-label">{{ form.card_expiry_year.label }}</label>
+                                {{ form.card_expiry_year }}
+                                {% if form.card_expiry_year.errors %}
+                                    <div class="text-danger">{{ form.card_expiry_year.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">YYYY (2024-2030)</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.card_cvv.id_for_label }}" class="form-label">{{ form.card_cvv.label }}</label>
+                                {{ form.card_cvv }}
+                                {% if form.card_cvv.errors %}
+                                    <div class="text-danger">{{ form.card_cvv.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">3 or 4 digits</small>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.card_image.id_for_label }}" class="form-label">{{ form.card_image.label }}</label>
+                                {{ form.card_image }}
+                                {% if form.card_image.errors %}
+                                    <div class="text-danger">{{ form.card_image.errors }}</div>
+                                {% endif %}
+                                <small class="text-muted">Upload a clear image of your card (optional)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check me-2"></i>Activate Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Features -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-shield-alt me-2"></i>Security Features
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>256-bit SSL encryption</li>
+                            <li><i class="fas fa-check text-success me-2"></i>PCI DSS compliant</li>
+                            <li><i class="fas fa-check text-success me-2"></i>No charges will be made</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Secure data transmission</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Account verification only</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Instant activation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why We Need This -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-question-circle me-2"></i>Why Do We Need Your Card Details?
+                </h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Account Verification:</strong> Ensures you're a real person</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Security:</strong> Protects against fraud and abuse</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Compliance:</strong> Required for financial services</li>
+                    <li><i class="fas fa-info text-info me-2"></i><strong>No Charges:</strong> We will not charge your card</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Reminder:</strong> This is for account activation only. No charges will be made to your card.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Payment method toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const cardDetailsSection = document.getElementById('card-details-section');
+    
+    function toggleCardDetails() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (selectedMethod && selectedMethod.value === 'card_verification') {
+            cardDetailsSection.style.display = 'block';
+        } else {
+            cardDetailsSection.style.display = 'none';
+        }
+    }
+    
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', toggleCardDetails);
+    });
+    
+    // Initial state
+    toggleCardDetails();
+    
+    // Payment duration change handler
+    const paymentDurationSelect = document.getElementById('{{ form.payment_duration.id_for_label }}');
+    const selectedDurationSpan = document.getElementById('selected-duration');
+    const monthlyPaymentSpan = document.getElementById('monthly-payment');
+    
+    if (paymentDurationSelect) {
+        paymentDurationSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption) {
+                selectedDurationSpan.textContent = selectedOption.text;
+                // You can add logic here to calculate monthly payment based on total price
+                monthlyPaymentSpan.textContent = 'TBD';
+            }
+        });
+    }
+    
+    // Card number formatting
+    const cardNumberInput = document.getElementById('{{ form.card_number.id_for_label }}');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function() {
+            let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            this.value = formattedValue;
+        });
+    }
+    
+    // CVV validation
+    const cvvInput = document.getElementById('{{ form.card_cvv.id_for_label }}');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').substring(0, 4);
+        });
+    }
+});
+</script>
+{% endblock %} 

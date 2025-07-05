@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Select iPhone - A N B TECH SUPPLIES{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fab fa-apple me-3"></i>Choose Your iPhones
+            </h1>
+            <p class="lead text-muted">Step 4 of 4: Select your preferred iPhone models (you can select more than one)</p>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-clipboard-list me-2"></i>Application Progress
+                </h5>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+                </div>
+                <small class="text-muted">Step 4 of 4: Phone selection</small>
+            </div>
+        </div>
+
+        <!-- Phone Selection Form -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="fas fa-mobile-alt me-2"></i>Available iPhone Models
+                </h5>
+                
+                <!-- Filter Options -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label for="series-filter" class="form-label">Filter by Series:</label>
+                        <select id="series-filter" class="form-select">
+                            <option value="">All Series</option>
+                            <option value="iPhone 11">iPhone 11 Series</option>
+                            <option value="iPhone 12">iPhone 12 Series</option>
+                            <option value="iPhone 13">iPhone 13 Series</option>
+                            <option value="iPhone 14">iPhone 14 Series</option>
+                            <option value="iPhone 15">iPhone 15 Series</option>
+                            <option value="iPhone 16">iPhone 16 Series</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="storage-filter" class="form-label">Filter by Storage:</label>
+                        <select id="storage-filter" class="form-select">
+                            <option value="">All Storage</option>
+                            <option value="64GB">64GB</option>
+                            <option value="128GB">128GB</option>
+                            <option value="256GB">256GB</option>
+                            <option value="512GB">512GB</option>
+                            <option value="1TB">1TB</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="price-filter" class="form-label">Price Range:</label>
+                        <select id="price-filter" class="form-select">
+                            <option value="">All Prices</option>
+                            <option value="0-10000">Under R10,000</option>
+                            <option value="10000-20000">R10,000 - R20,000</option>
+                            <option value="20000-30000">R20,000 - R30,000</option>
+                            <option value="30000-50000">Over R30,000</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" id="clear-filters" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-2"></i>Clear Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Group phones by series -->
+                    {% regroup phones by name|slice:":8" as phone_series %}
+                    
+                    {% for series in phone_series %}
+                    <div class="phone-series mb-4" data-series="{{ series.grouper }}">
+                        <h6 class="text-primary mb-3">
+                            <i class="fab fa-apple me-2"></i>{{ series.grouper }} Series
+                        </h6>
+                        <div class="row">
+                            {% for phone in series.list %}
+                            <div class="col-lg-4 col-md-6 mb-4 phone-item" 
+                                 data-series="{{ phone.name|slice:':8' }}" 
+                                 data-storage="{{ phone.storage }}" 
+                                 data-price="{{ phone.price }}">
+                                <div class="card phone-card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <i class="fab fa-apple fa-4x text-primary"></i>
+                                        </div>
+                                        <h5 class="card-title fw-bold">{{ phone.name }}</h5>
+                                        <p class="text-muted">{{ phone.storage }} • {{ phone.color }}</p>
+                                        <div class="mb-3">
+                                            <span class="badge bg-primary">{{ phone.model }}</span>
+                                        </div>
+                                        <h4 class="text-primary fw-bold">R{{ phone.price|floatformat:0 }}</h4>
+                                        <p class="text-muted small">Monthly installment available</p>
+                                        <div class="form-check d-flex justify-content-center mb-2">
+                                            <input class="form-check-input" type="checkbox" name="phones" value="{{ phone.id }}" id="phone_{{ phone.id }}">
+                                            <label class="form-check-label ms-2" for="phone_{{ phone.id }}">
+                                                Select this iPhone
+                                            </label>
+                                        </div>
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <label for="id_quantity_{{ phone.id }}" class="me-2 mb-0">Qty:</label>
+                                            <input type="number" name="quantity_{{ phone.id }}" id="id_quantity_{{ phone.id }}" class="form-control" value="1" min="1" style="width: 80px; display: inline-block;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No iPhone models are currently available. Please check back later.
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if phones %}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-right me-2"></i>Continue to Payment
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- iPhone Features -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-star me-2"></i>Why Choose iPhone?
+                </h6>
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <i class="fas fa-shield-alt fa-2x text-primary mb-2"></i>
+                        <h6>Secure</h6>
+                        <small class="text-muted">Advanced security features</small>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <i class="fas fa-camera fa-2x text-primary mb-2"></i>
+                        <h6>Camera</h6>
+                        <small class="text-muted">Professional quality photos</small>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <i class="fas fa-battery-full fa-2x text-primary mb-2"></i>
+                        <h6>Battery</h6>
+                        <small class="text-muted">All-day battery life</small>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <i class="fas fa-sync fa-2x text-primary mb-2"></i>
+                        <h6>Updates</h6>
+                        <small class="text-muted">Regular iOS updates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installment Information -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-credit-card me-2"></i>Installment Information
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>0% interest on approved applications</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Flexible payment terms available</li>
+                            <li><i class="fas fa-check text-success me-2"></i>No hidden fees</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Quick approval process</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Secure payment processing</li>
+                            <li><i class="fas fa-check text-success me-2"></i>24/7 customer support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add checkbox selection styling
+document.querySelectorAll('input[type="checkbox"][name="phones"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        document.querySelectorAll('.phone-card').forEach(card => {
+            card.classList.remove('border-primary');
+        });
+        document.querySelectorAll('input[type="checkbox"][name="phones"]:checked').forEach(cb => {
+            cb.closest('.phone-card').classList.add('border-primary');
+        });
+    });
+});
+
+// Filter functionality
+function applyFilters() {
+    const seriesFilter = document.getElementById('series-filter').value;
+    const storageFilter = document.getElementById('storage-filter').value;
+    const priceFilter = document.getElementById('price-filter').value;
+    
+    document.querySelectorAll('.phone-item').forEach(item => {
+        let show = true;
+        
+        // Series filter
+        if (seriesFilter && item.dataset.series !== seriesFilter) {
+            show = false;
+        }
+        
+        // Storage filter
+        if (storageFilter && item.dataset.storage !== storageFilter) {
+            show = false;
+        }
+        
+        // Price filter
+        if (priceFilter) {
+            const price = parseInt(item.dataset.price);
+            const [min, max] = priceFilter.split('-').map(Number);
+            if (price < min || price > max) {
+                show = false;
+            }
+        }
+        
+        // Show/hide item
+        item.style.display = show ? 'block' : 'none';
+    });
+    
+    // Show/hide series headers
+    document.querySelectorAll('.phone-series').forEach(series => {
+        const visibleItems = series.querySelectorAll('.phone-item[style="display: block"], .phone-item:not([style*="display: none"])');
+        series.style.display = visibleItems.length > 0 ? 'block' : 'none';
+    });
+}
+
+// Add event listeners for filters
+document.getElementById('series-filter').addEventListener('change', applyFilters);
+document.getElementById('storage-filter').addEventListener('change', applyFilters);
+document.getElementById('price-filter').addEventListener('change', applyFilters);
+
+// Clear filters
+document.getElementById('clear-filters').addEventListener('click', function() {
+    document.getElementById('series-filter').value = '';
+    document.getElementById('storage-filter').value = '';
+    document.getElementById('price-filter').value = '';
+    applyFilters();
+});
+
+// Initialize filters
+applyFilters();
+</script>
+{% endblock %} 

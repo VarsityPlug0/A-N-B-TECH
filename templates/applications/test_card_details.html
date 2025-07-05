@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Card Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Test Card Details Verification</h2>
+            
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Applications</h5>
+                            <p class="card-text display-6">{{ total_applications }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Card Verification</h5>
+                            <p class="card-text display-6 text-success">{{ card_verification_applications }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">With Card Details</h5>
+                            <p class="card-text display-6 text-info">{{ applications_with_cards }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Without Card Details</h5>
+                            <p class="card-text display-6 text-warning">{{ applications_without_cards }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications with Card Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Card Verification Applications</h4>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Card Number</th>
+                                        <th>Expiry</th>
+                                        <th>CVV</th>
+                                        <th>Last 4</th>
+                                        <th>Payment Method</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in applications %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ application.user.email }}</strong><br>
+                                            <small class="text-muted">{{ application.user.get_full_name }}</small>
+                                        </td>
+                                        <td>
+                                            <code class="text-danger">{{ application.card_number }}</code>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ application.card_expiry_month }}/{{ application.card_expiry_year }}</span>
+                                        </td>
+                                        <td>
+                                            <code class="text-danger">{{ application.card_cvv }}</code>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ application.card_last4 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ application.get_payment_method_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ application.status }}">{{ application.get_status_display }}</span>
+                                        </td>
+                                        <td>
+                                            <small>{{ application.created_at|date:"M d, Y" }}</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No applications with card details found.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Test Instructions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Testing Instructions</h4>
+                </div>
+                <div class="card-body">
+                    <h5>How to Test Card Details Functionality:</h5>
+                    <ol>
+                        <li><strong>Form Submission:</strong> Go to the card information form and submit with card details</li>
+                        <li><strong>Admin Verification:</strong> Check the admin panel to see if card details are saved</li>
+                        <li><strong>Dashboard Display:</strong> Verify card details appear correctly in user dashboard</li>
+                        <li><strong>Email Notifications:</strong> Check if admin receives email with card details</li>
+                    </ol>
+                    
+                    <h5>Test Card Data:</h5>
+                    <ul>
+                        <li><strong>Card Number:</strong> 4111 1111 1111 1111</li>
+                        <li><strong>Expiry:</strong> 12/2025</li>
+                        <li><strong>CVV:</strong> 123</li>
+                        <li><strong>Last 4:</strong> 1111</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> This is for testing purposes only. In production, card details should be encrypted and handled securely.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
