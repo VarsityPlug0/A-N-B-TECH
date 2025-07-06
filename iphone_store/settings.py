@@ -196,3 +196,5 @@ LOGGING = {
 LOGIN_URL = '/applications/'
 LOGIN_REDIRECT_URL = '/applications/dashboard/'
 LOGOUT_REDIRECT_URL = '/applications/'
+
+CSRF_TRUSTED_ORIGINS = ['https://a-n-b-tech.onrender.com']
