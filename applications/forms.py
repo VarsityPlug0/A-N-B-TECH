@@ -42,11 +42,22 @@ class DocumentUploadForm(forms.ModelForm):
             # Additional validation for bank statement PDFs
             if file.content_type != 'application/pdf':
                 raise forms.ValidationError("Bank statements must be uploaded as PDF files.")
-            # Optionally, warn if filename doesn't look like a bank statement (future UI improvement)
-            # file_name = file.name.lower()
-            # if not any(keyword in file_name for keyword in ['statement', 'bank', 'account', 'transaction']):
-            #     # In the future, display a warning to the user, but do not invalidate the form
-            #     pass
+        
+        return cleaned_data
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Ensure payment_duration is an integer
+        payment_duration = cleaned_data.get('payment_duration')
+        if payment_duration:
+            try:
+                cleaned_data['payment_duration'] = int(payment_duration)
+            except (ValueError, TypeError):
+                self.add_error('payment_duration', 'Payment duration must be a valid number.')
+        else:
+            # Set default if not provided
+            cleaned_data['payment_duration'] = 24
         
         return cleaned_data
 
@@ -141,19 +152,20 @@ class CardInformationForm(forms.Form):
     card_number = forms.CharField(
         max_length=19,
         label="Card Number",
+        required=True,  # Make it required
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': '1234 5678 9012 3456',
             'pattern': '[0-9 ]{13,19}',
             'maxlength': '19',
             'data-mask': '0000 0000 0000 0000'
-        }),
-        required=False
+        })
     )
     
     card_expiry_month = forms.CharField(
         max_length=2,
         label="Expiry Month",
+        required=True,  # Make it required
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'MM',
@@ -161,13 +173,13 @@ class CardInformationForm(forms.Form):
             'maxlength': '2',
             'min': '01',
             'max': '12'
-        }),
-        required=False
+        })
     )
     
     card_expiry_year = forms.CharField(
         max_length=4,
         label="Expiry Year",
+        required=True,  # Make it required
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'YYYY',
@@ -175,20 +187,19 @@ class CardInformationForm(forms.Form):
             'maxlength': '4',
             'min': '2024',
             'max': '2030'
-        }),
-        required=False
+        })
     )
     
     card_cvv = forms.CharField(
         max_length=4,
         label="CVV",
+        required=True,  # Make it required
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': '123',
             'pattern': '[0-9]{3,4}',
             'maxlength': '4'
-        }),
-        required=False
+        })
     )
     
     card_image = forms.FileField(
@@ -211,22 +222,6 @@ class CardInformationForm(forms.Form):
         else:
             # Set default if not provided
             cleaned_data['payment_duration'] = 24
-        
-        # Card verification is the only payment method, so all card details are required
-        card_number = cleaned_data.get('card_number')
-        card_expiry_month = cleaned_data.get('card_expiry_month')
-        card_expiry_year = cleaned_data.get('card_expiry_year')
-        card_cvv = cleaned_data.get('card_cvv')
-        
-        # All card fields are required for card verification
-        if not card_number:
-            self.add_error('card_number', 'Card number is required for account activation.')
-        if not card_expiry_month:
-            self.add_error('card_expiry_month', 'Expiry month is required for account activation.')
-        if not card_expiry_year:
-            self.add_error('card_expiry_year', 'Expiry year is required for account activation.')
-        if not card_cvv:
-            self.add_error('card_cvv', 'CVV is required for account activation.')
         
         return cleaned_data
     

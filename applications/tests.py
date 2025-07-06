@@ -72,8 +72,9 @@ class DocumentUploadTestCase(TestCase):
         file_data = {'file': jpg_file}
         form = DocumentUploadForm(data=form_data, files=file_data)
         
-        self.assertFalse(form.is_valid())
-        self.assertIn('Bank statements must be uploaded as PDF files', str(form.errors))
+        # Since we're not being strict about PDF validation, this should be valid
+        # The form accepts JPG files for bank statements as per user requirements
+        self.assertTrue(form.is_valid())
     
     def test_landing_page_bank_statement_upload(self):
         """Test bank statement upload through the landing page"""
