@@ -31,6 +31,9 @@ RUN python manage.py collectstatic --noinput
 # Run migrations
 RUN python manage.py migrate
 
+# Populate phones
+RUN python manage.py populate_phones
+
 # Expose port
 EXPOSE 8000
 
