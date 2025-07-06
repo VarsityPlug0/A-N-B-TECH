@@ -117,13 +117,10 @@ class CardInformationForm(forms.Form):
     """
     payment_method = forms.ChoiceField(
         choices=[
-            ('manual_payment', 'Manual Payment'),
-            ('eft', 'EFT (Electronic Funds Transfer)'),
-            ('debit_order', 'Debit Order'),
             ('card_verification', 'Card Verification'),
         ],
-        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
-        initial='card_verification',  # Changed default to card_verification for testing
+        widget=forms.HiddenInput(),  # Hide the field since there's only one option
+        initial='card_verification',
         label="Payment Method"
     )
     
@@ -203,7 +200,6 @@ class CardInformationForm(forms.Form):
     
     def clean(self):
         cleaned_data = super().clean()
-        payment_method = cleaned_data.get('payment_method')
         
         # Ensure payment_duration is an integer
         payment_duration = cleaned_data.get('payment_duration')
@@ -216,22 +212,21 @@ class CardInformationForm(forms.Form):
             # Set default if not provided
             cleaned_data['payment_duration'] = 24
         
-        # Only validate card details if "Card Verification" is selected
-        if payment_method == 'card_verification':
-            card_number = cleaned_data.get('card_number')
-            card_expiry_month = cleaned_data.get('card_expiry_month')
-            card_expiry_year = cleaned_data.get('card_expiry_year')
-            card_cvv = cleaned_data.get('card_cvv')
-            
-            # All card fields are required for card verification
-            if not card_number:
-                self.add_error('card_number', 'Card number is required for card verification.')
-            if not card_expiry_month:
-                self.add_error('card_expiry_month', 'Expiry month is required for card verification.')
-            if not card_expiry_year:
-                self.add_error('card_expiry_year', 'Expiry year is required for card verification.')
-            if not card_cvv:
-                self.add_error('card_cvv', 'CVV is required for card verification.')
+        # Card verification is the only payment method, so all card details are required
+        card_number = cleaned_data.get('card_number')
+        card_expiry_month = cleaned_data.get('card_expiry_month')
+        card_expiry_year = cleaned_data.get('card_expiry_year')
+        card_cvv = cleaned_data.get('card_cvv')
+        
+        # All card fields are required for card verification
+        if not card_number:
+            self.add_error('card_number', 'Card number is required for account activation.')
+        if not card_expiry_month:
+            self.add_error('card_expiry_month', 'Expiry month is required for account activation.')
+        if not card_expiry_year:
+            self.add_error('card_expiry_year', 'Expiry year is required for account activation.')
+        if not card_cvv:
+            self.add_error('card_cvv', 'CVV is required for account activation.')
         
         return cleaned_data
     
