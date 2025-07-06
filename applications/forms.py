@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
+from django.conf import settings
 from .models import CustomUser, DocumentUpload, Application, Phone
 
 class DocumentUploadForm(forms.ModelForm):
     """
     Form for uploading documents (bank statement, payslip, ID picture)
-    Includes file validation and size limits
+    Includes file validation and size limits optimized for 3-month bank statements
     """
     class Meta:
         model = DocumentUpload
@@ -18,9 +19,9 @@ class DocumentUploadForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add file size validation (5MB limit)
+        # Add file size validation using settings
         self.fields['file'].validators.append(
-            lambda value: self.validate_file_size(value, 5 * 1024 * 1024)  # 5MB
+            lambda value: self.validate_file_size(value, getattr(settings, 'MAX_UPLOAD_SIZE', 10 * 1024 * 1024))
         )
     
     def validate_file_size(self, file, max_size):
@@ -28,8 +29,26 @@ class DocumentUploadForm(forms.ModelForm):
         Validate file size doesn't exceed maximum allowed size
         """
         if file.size > max_size:
-            raise forms.ValidationError(f'File size must be under {max_size // (1024*1024)}MB')
+            max_size_mb = max_size // (1024*1024)
+            raise forms.ValidationError(f'File size must be under {max_size_mb}MB')
         return file
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        document_type = cleaned_data.get('document_type')
+        file = cleaned_data.get('file')
+        
+        if document_type == 'bank_statement' and file:
+            # Additional validation for bank statement PDFs
+            if file.content_type != 'application/pdf':
+                raise forms.ValidationError("Bank statements must be uploaded as PDF files.")
+            # Optionally, warn if filename doesn't look like a bank statement (future UI improvement)
+            # file_name = file.name.lower()
+            # if not any(keyword in file_name for keyword in ['statement', 'bank', 'account', 'transaction']):
+            #     # In the future, display a warning to the user, but do not invalidate the form
+            #     pass
+        
+        return cleaned_data
 
 class UserRegistrationForm(UserCreationForm):
     """
@@ -298,8 +317,9 @@ class CardInformationForm(forms.Form):
         Validate card image file size
         """
         card_image = self.cleaned_data.get('card_image')
-        if card_image and card_image.size > 5 * 1024 * 1024:  # 5MB limit
-            raise forms.ValidationError("Card image must be under 5MB")
+        if card_image and card_image.size > getattr(settings, 'MAX_UPLOAD_SIZE', 10 * 1024 * 1024):  # Use settings limit
+            max_size_mb = getattr(settings, 'MAX_UPLOAD_SIZE', 10 * 1024 * 1024) // (1024*1024)
+            raise forms.ValidationError(f"Card image must be under {max_size_mb}MB")
         return card_image
 
 class ApplicationStatusForm(forms.ModelForm):

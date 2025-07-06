@@ -146,7 +146,7 @@ DEFAULT_FROM_EMAIL = 'noreply@iphonestore.com'
 ADMIN_EMAIL = 'admin@iphonestore.com'
 
 # File Upload Settings
-MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB (increased for 3-month bank statements)
 ALLOWED_FILE_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
 
 # Default primary key field type

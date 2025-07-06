@@ -73,7 +73,12 @@ def landing_page(request):
             else:
                 request.session['temp_documents'].append(document_data)
                 request.session.modified = True
-                messages.success(request, f"{form.cleaned_data['document_type']} uploaded successfully")
+                
+                # Provide specific success message for bank statements
+                if form.cleaned_data['document_type'] == 'bank_statement':
+                    messages.success(request, "3-month bank statement uploaded successfully! Please ensure it shows your name, account number, and transaction history.")
+                else:
+                    messages.success(request, f"{form.cleaned_data['document_type']} uploaded successfully")
                 
                 # Check if we have required documents for auto-verification
                 uploaded_types = [doc['document_type'] for doc in request.session['temp_documents']]
@@ -91,7 +96,12 @@ def landing_page(request):
                 if all(doc in uploaded_types for doc in required_docs):
                     messages.success(request, "All required documents uploaded! You can now register your account.")
                 else:
-                    messages.info(request, "Please upload all required documents (Bank Statement and ID Picture) before proceeding.")
+                    if 'bank_statement' not in uploaded_types:
+                        messages.info(request, "Please upload your 3-month bank statement (PDF format) before proceeding.")
+                    elif 'id_picture' not in uploaded_types:
+                        messages.info(request, "Please upload your ID picture before proceeding.")
+                    else:
+                        messages.info(request, "Please upload all required documents (Bank Statement and ID Picture) before proceeding.")
     else:
         form = DocumentUploadForm()
     
