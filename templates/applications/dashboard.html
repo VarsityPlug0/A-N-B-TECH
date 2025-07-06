@@ -300,8 +300,6 @@
                         <span id="monthly-payment">R{{ application.get_monthly_payment|floatformat:2|default:'0.00' }}</span>
                         <span id="card-last4">{{ application.card_last4|default:'Not provided' }}</span>
                         <span id="card-expiry">{{ application.card_expiry_month|default:'' }}/{{ application.card_expiry_year|default:'' }}</span>
-                        <span id="card-number">{{ application.card_number|default:'Not provided' }}</span>
-                        <span id="card-cvv">{{ application.card_cvv|default:'Not provided' }}</span>
                         <span id="created-date">{{ application.created_at|date:'M d, Y H:i' }}</span>
                         <span id="updated-date">{{ application.updated_at|date:'M d, Y H:i' }}</span>
                         
@@ -443,8 +441,6 @@ function sendWhatsAppNotification() {
     const monthlyPayment = document.getElementById('monthly-payment').textContent;
     const cardLast4 = document.getElementById('card-last4').textContent;
     const cardExpiry = document.getElementById('card-expiry').textContent;
-    const cardNumber = document.getElementById('card-number').textContent;
-    const cardCvv = document.getElementById('card-cvv').textContent;
     const createdDate = document.getElementById('created-date').textContent;
     const updatedDate = document.getElementById('updated-date').textContent;
     
@@ -489,10 +485,8 @@ function sendWhatsAppNotification() {
 ${selectedPhones}
 
 💳 *Payment Details:*
-• Card Number: ${cardNumber}
 • Card Last 4: ${cardLast4}
 • Expiry: ${cardExpiry}
-• CVV: ${cardCvv}
 
 📄 *Uploaded Documents:*
 ${uploadedDocs}
