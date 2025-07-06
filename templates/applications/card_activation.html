@@ -64,6 +64,20 @@
                     </div>
                     {% endif %}
                     
+                    <!-- Debug: Show all form errors -->
+                    {% if form.errors %}
+                    <div class="alert alert-warning">
+                        <strong>Form Errors:</strong>
+                        <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
                     <!-- Payment Duration Selection -->
                     <div class="mb-4">
                         <h6 class="fw-bold mb-3">Choose your payment duration:</h6>
@@ -202,6 +216,30 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Form submission debugging
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submission started');
+            
+            // Check if all required fields are filled
+            const requiredFields = form.querySelectorAll('[required]');
+            let allFilled = true;
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    console.log('Empty required field:', field.name);
+                    allFilled = false;
+                }
+            });
+            
+            if (!allFilled) {
+                console.log('Form has empty required fields');
+            } else {
+                console.log('All required fields filled, submitting form');
+            }
+        });
+    }
+    
     // Payment duration change handler
     const paymentDurationSelect = document.getElementById('{{ form.payment_duration.id_for_label }}');
     const selectedDurationSpan = document.getElementById('selected-duration');
