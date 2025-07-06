@@ -44,22 +44,6 @@ class DocumentUploadForm(forms.ModelForm):
                 raise forms.ValidationError("Bank statements must be uploaded as PDF files.")
         
         return cleaned_data
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        
-        # Ensure payment_duration is an integer
-        payment_duration = cleaned_data.get('payment_duration')
-        if payment_duration:
-            try:
-                cleaned_data['payment_duration'] = int(payment_duration)
-            except (ValueError, TypeError):
-                self.add_error('payment_duration', 'Payment duration must be a valid number.')
-        else:
-            # Set default if not provided
-            cleaned_data['payment_duration'] = 24
-        
-        return cleaned_data
 
 class UserRegistrationForm(UserCreationForm):
     """
@@ -209,8 +193,17 @@ class CardInformationForm(forms.Form):
         required=False
     )
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure payment method is always set to card_verification
+        if not self.data:  # Only set initial if not a POST request
+            self.fields['payment_method'].initial = 'card_verification'
+    
     def clean(self):
         cleaned_data = super().clean()
+        
+        # Always set payment method to card_verification
+        cleaned_data['payment_method'] = 'card_verification'
         
         # Ensure payment_duration is an integer
         payment_duration = cleaned_data.get('payment_duration')
